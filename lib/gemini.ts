@@ -5,9 +5,10 @@ import { QuizAnswers, WeatherInfo, GeminiSuggestion } from "@/types";
 const getGeminiClient = () => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === "your_gemini_api_key_here") {
-    console.warn("GEMINI_API_KEY is not configured or using placeholder");
+    console.warn("[Gemini] ⚠️  GEMINI_API_KEY is not configured — falling back to mock suggestions");
     return null;
   }
+  console.log("[Gemini] ✅ API key found, client initialised");
   return new GoogleGenerativeAI(apiKey);
 };
 
@@ -20,8 +21,11 @@ export async function generateHangoutSuggestions(
   const client = getGeminiClient();
 
   if (!client) {
+    console.log("[Gemini] ℹ️  No client available — returning mock suggestions");
     return getMockSuggestions(answers);
   }
+
+  console.log(`[Gemini] 🚀 Requesting suggestions | mood: "${answers.mood}" | company: "${answers.company}" | budget: "${answers.budget}" | distance: "${answers.distance}" | weather: ${weather.description} ${weather.temperature}°C | time: ${currentTime} ${currentDay}`);
 
   try {
     const model = client.getGenerativeModel({
@@ -79,15 +83,17 @@ Return ONLY the JSON array. No explanation, no markdown.`;
     }
 
     const suggestions: GeminiSuggestion[] = JSON.parse(responseText.trim());
+    console.log(`[Gemini] ✅ Success — received ${suggestions.length} suggestion(s): ${suggestions.map(s => s.name).join(", ")}`);
     return suggestions;
   } catch (error) {
-    console.error("Error generating Gemini suggestions:", error);
+    console.error("[Gemini] ❌ Request failed — falling back to mock suggestions:", error);
     return getMockSuggestions(answers);
   }
 }
 
 // Fallback mock recommendations in case API keys are missing or requests fail
 function getMockSuggestions(answers: QuizAnswers): GeminiSuggestion[] {
+  console.log("[Gemini] ℹ️  Using mock suggestion database");
   const mood = answers.mood.toLowerCase();
   const budget = answers.budget.toLowerCase();
   const distance = answers.distance.toLowerCase();
@@ -361,5 +367,6 @@ function getMockSuggestions(answers: QuizAnswers): GeminiSuggestion[] {
     finalSuggestions = [...finalSuggestions, ...pool].slice(0, 3);
   }
 
+  console.log(`[Gemini] ✅ Mock returned ${finalSuggestions.length} suggestion(s): ${finalSuggestions.map(s => s.name).join(", ")}`);
   return finalSuggestions;
 }

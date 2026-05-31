@@ -44,8 +44,9 @@ export async function POST(request: Request) {
           
           commute = await getDirections(destLat, destLng, destAddress);
 
-          // Step 4: Generate Ola booking link and Google Maps Link
-          olaLink = `https://olawebsite.com/booking?pickup=23.2332,77.4272&drop=${destLat},${destLng}`;
+          // Step 4: Generate Uber ride link (pre-fills pickup at Bhopal city center + destination)
+          // Uber's web deep-link supports lat/lng params and works in India
+          olaLink = `https://m.uber.com/ul/?action=setPickup&pickup[latitude]=23.2332&pickup[longitude]=77.4272&pickup[nickname]=City%20Center%20Bhopal&dropoff[latitude]=${destLat}&dropoff[longitude]=${destLng}&dropoff[nickname]=${encodeURIComponent(suggestion.name)}`;
           googleMapsLink = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
             details.formatted_address || details.name + " Bhopal"
           )}`;

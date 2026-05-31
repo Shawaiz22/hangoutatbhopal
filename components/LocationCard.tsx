@@ -340,10 +340,10 @@ export const LocationCard: React.FC<LocationCardProps> = ({
                           href={olaLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#ffe66d] text-slate-900 hover:bg-[#ffe66d]/90 font-extrabold text-xs transition-all duration-300 tap-target text-center shadow-lg"
+                          className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-black text-white hover:bg-neutral-800 font-extrabold text-xs transition-all duration-300 tap-target text-center shadow-lg border border-white/10"
                         >
                           <Car className="w-3.5 h-3.5" />
-                          <span>Book Ola</span>
+                          <span>Book Uber</span>
                         </a>
                       )}
                     </div>

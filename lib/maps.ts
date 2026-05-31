@@ -12,10 +12,11 @@ const getMapsApiKey = () => {
 export async function searchPlace(query: string): Promise<PlaceDetails | null> {
   const apiKey = getMapsApiKey();
   if (!apiKey) {
-    console.warn(`GOOGLE_MAPS_API_KEY is not set. Generating mock PlaceDetails for query: ${query}`);
+    console.warn(`[Maps] ⚠️  GOOGLE_MAPS_API_KEY not set — returning mock PlaceDetails for: "${query}"`);
     return getMockPlaceDetails(query);
   }
 
+  console.log(`[Maps] 🔍 Places Text Search → "${query}"`);
   try {
     const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(
       query
@@ -26,7 +27,7 @@ export async function searchPlace(query: string): Promise<PlaceDetails | null> {
     const data = await res.json();
 
     if (data.status !== "OK" || !data.results || data.results.length === 0) {
-      console.warn(`No search results found for query: ${query}. Status: ${data.status}`);
+      console.warn(`[Maps] ⚠️  Places Text Search — no results for "${query}" | API status: ${data.status}`);
       return null;
     }
 
@@ -50,9 +51,10 @@ export async function searchPlace(query: string): Promise<PlaceDetails | null> {
       lng: geometry.lng,
     };
 
+    console.log(`[Maps] ✅ Places Text Search — found "${firstResult.name}" | place_id: ${placeId} | rating: ${firstResult.rating ?? "N/A"} | photos: ${placeDetails.photos?.length ?? 0}`);
     return placeDetails;
   } catch (error) {
-    console.error(`Error searching place for query "${query}":`, error);
+    console.error(`[Maps] ❌ Places Text Search failed for "${query}" — falling back to mock:`, error);
     return getMockPlaceDetails(query);
   }
 }
@@ -65,6 +67,7 @@ export async function getPlaceDetails(placeId: string): Promise<Partial<PlaceDet
     return {};
   }
 
+  console.log(`[Maps] 🔍 Place Details → place_id: ${placeId}`);
   try {
     const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews,formatted_phone_number,website,opening_hours&key=${apiKey}`;
 
@@ -73,7 +76,7 @@ export async function getPlaceDetails(placeId: string): Promise<Partial<PlaceDet
     const data = await res.json();
 
     if (data.status !== "OK" || !data.result) {
-      console.warn(`No details found for placeId: ${placeId}. Status: ${data.status}`);
+      console.warn(`[Maps] ⚠️  Place Details — no result for place_id: ${placeId} | API status: ${data.status}`);
       return null;
     }
 
@@ -90,9 +93,10 @@ export async function getPlaceDetails(placeId: string): Promise<Partial<PlaceDet
       })) : [],
     };
 
+    console.log(`[Maps] ✅ Place Details — place_id: ${placeId} | reviews: ${details.reviews?.length ?? 0} | open_now: ${details.open_now ?? "unknown"} | has_website: ${!!details.website}`);
     return details;
   } catch (error) {
-    console.error(`Error getting place details for ID "${placeId}":`, error);
+    console.error(`[Maps] ❌ Place Details failed for place_id "${placeId}":`, error);
     return {};
   }
 }
